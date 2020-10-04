@@ -29,8 +29,6 @@ public class MealsUtil {
 
         List<MealTo> mealsTo = filteredByStreams(meals, startTime, endTime, 2000);
         mealsTo.forEach(System.out::println);
-
-        System.out.println(filteredByCycles(meals, startTime, endTime, 2000));
     }
 
     public static List<MealTo> filteredByStreams(List<Meal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
@@ -44,20 +42,6 @@ public class MealsUtil {
                 .filter(meal -> isBetweenHalfOpen(meal.getTime(), startTime, endTime))
                 .map(meal -> createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
-    }
-
-    public static List<MealTo> filteredByCycles(List<Meal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-
-        final Map<LocalDate, Integer> caloriesSumByDate = new HashMap<>();
-        meals.forEach(meal -> caloriesSumByDate.merge(meal.getDate(), meal.getCalories(), Integer::sum));
-
-        final List<MealTo> mealsTo = new ArrayList<>();
-        meals.forEach(meal -> {
-            if (isBetweenHalfOpen(meal.getTime(), startTime, endTime)) {
-                mealsTo.add(createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay));
-            }
-        });
-        return mealsTo;
     }
 
     private static MealTo createTo(Meal meal, boolean excess) {
