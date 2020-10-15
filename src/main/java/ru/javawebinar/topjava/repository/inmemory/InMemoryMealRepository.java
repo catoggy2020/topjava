@@ -3,8 +3,11 @@ package ru.javawebinar.topjava.repository.inmemory;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,7 +24,10 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Meal save(int userId, Meal meal) {
-        Map<Integer, Meal> map = repository.getOrDefault(userId, new HashMap<>());
+        if (!repository.containsKey(userId)) {
+            repository.put(userId, new HashMap<>());
+        }
+        Map<Integer, Meal> map = repository.get(userId);
 
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
@@ -49,7 +55,7 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
+    public Collection<Meal> getAllFiltered(int userId, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         if (!repository.containsKey(userId)) {
             return Collections.emptyList();
         }
@@ -57,8 +63,15 @@ public class InMemoryMealRepository implements MealRepository {
                 .get(userId)
                 .values()
                 .stream()
+                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate))
+                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getTime(), startTime, endTime))
                 .sorted((meal1, meal2) -> meal2.getDate().compareTo(meal1.getDate()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<Meal> getAll(int userId) {
+        return getAllFiltered(userId, LocalDate.MIN, LocalDate.MAX, LocalTime.MIN, LocalTime.MAX);
     }
 }
 

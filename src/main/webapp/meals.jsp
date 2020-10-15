@@ -23,6 +23,13 @@
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
+    <form action="meals?action=filter" method="get">
+        Начальная дата<input type="date" name="startDate">
+        Конечная дата<input type="date" name="endDate">
+        Начальное время<input type="time" name="startTime">
+        Конечное время<input type="time" name="endTime">
+        <input type="submit" value="Фильтровать">
+    </form>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
         <tr>
